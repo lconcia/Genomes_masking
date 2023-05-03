@@ -1,0 +1,1175 @@
+
+######### preliminary steps
+
+
+# download the assembly of interest
+wget https://github.com/schatzlab/Col-CEN/blob/main/v1.2/Col-CEN_v1.2.fasta.gz?raw=true -O Col-CEN_v1.2.fasta.gz
+
+## uncompress the fasta file and 
+gzip -d Col-CEN_v1.2.fasta.gz | samtools faidx
+
+## index the index it and extract the chromosome size 
+samtools faidx Col-CEN_v1.2.fasta
+cut -f1,2      Col-CEN_v1.2.fasta.fai > Col-CEN_v1.2.sizes.genome
+
+## split the genome in 100-bp non overlapping windows
+bedtools makewindows -g Col-CEN_v1.2.sizes.genome -w 100 > Col-CEN_v1.2.100bp.bed
+
+## calculate GC% in the 100-bp bins
+time bedtools nuc -fi  Col-CEN_v1.2.fasta -bed Col-CEN_v1.2.100bp.bed | \
+cut -f 1-3,5 | tail -n +2 > Col-CEN_v1.2.GC_value.bedgraph
+
+### count the reads mapping on each bins in each input samples 
+for f in *input.bam
+do
+bedtools multicov -bams $f -bed Col-CEN_v1.2.100bp.bed > $f.100bp.bed
+done
+
+
+#### concatenate the bed files
+
+
+paste \
+ <( cut -f 1-3 /kingdoms/mpb/workspace19/concia/H1_shared/reference_genomes.IBENS/CEN.genome_assembly/CEN.100bp.no_ChrM_ChrC.bed ) \
+ <( cut -f 4 CEN.100bp.180307_NB501850_A_L1-4_ANYO-1_R1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.180903_NB501850_A_L1-4_ANYO-16_R1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.201224_I22_V300086931_L4_C2_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.201224_I22_V300086931_L4_D3_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.201224_I22_V300086931_L4_D8_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.201224_I22_V300086931_L4_G4_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_336_S2_L001_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_336_S2_L001_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_336_S2_L002_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_336_S2_L002_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_336_S2_L003_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_336_S2_L003_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_336_S2_L004_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_336_S2_L004_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_351_S9_L001_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_351_S9_L001_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_351_S9_L002_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_351_S9_L002_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_351_S9_L003_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_351_S9_L003_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_351_S9_L004_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.2017_351_S9_L004_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.210318_I100400190019_V300099928_L1_IP_WT_D_R1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.210318_I100400190019_V300099928_L1_IP_WT_D_R1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.210318_I100400190019_V300099928_L1_IP_WT_L_R1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.210318_I100400190019_V300099928_L1_IP_WT_L_R1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.211110_M029_V350030665_L02_input_1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.211110_M029_V350030665_L02_input_2_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.211110_M029_V350030665_L02_input_3_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.211110_M029_V350030665_L02_input_4_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.6_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.6_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.antiHY5-input-wt_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.antiHY5-input-wt_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.H2Bub_input_wt_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.H2Bub_input_wt_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_1A_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_1A_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_1B_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_1B_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_1_wt_D_rep1_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_1_wt_D_rep1_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_1_wt_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_1_wt_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_6_wt_D_rep2_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_6_wt_D_rep2_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_col_22C_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_col_22C_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_col_37C_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_col_37C_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_K27_WT_rep1_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_K27_WT_rep1_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_K27_WT_rep2_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_K27_WT_rep2_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_wt_L1_1.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input_wt_L1_2.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input-WT-rep2_R1_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.input-WT-rep2_R2_001.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.INWT_35217_CGATGT.sorted.filtered.nodup.bed ) \
+ <( cut -f 4 CEN.100bp.SIM7_1.sorted.filtered.nodup.bed )  > \
+  CEN.100bp.masking.Vidal_samples.21Feb2023.bed
+
+####################################################################################
+
+### in R 
+
+
+
+library(ggplot2)
+library(dplyr)
+library(plyr)
+library(matrixStats)
+library(scales)
+
+options(scipen = 100, digits = 3)
+
+setwd("/Users/lorenzoconcia/Documents/Collaborations_analysis/Masking.CEN.22Feb2023/")
+
+# load("Masking.CEN.15Apr2023.Rdata")
+
+GC  <- read.table("Col-CEN_v1.2.GC_value.bedgraph.gz")
+cov <- read.table("CEN.100bp.masking.Vidal_samples.21Feb2023.bed.gz")  ## 60 bam files
+
+colnames(cov) <- c("Chr","s","e",sprintf("bam%s",seq(1:60)))
+rownames(cov) <- paste(cov$Chr, cov$s, sep="_")
+
+colnames(GC) <- c("Chr","s","e","GC")
+rownames(GC)<- paste(cov$Chr, cov$s, sep="_")
+
+GC <- (GC %>% mutate(GC.bracket = ntile(GC,10)))
+
+counts <- cov %>% select(contains("bam"))
+
+## check how many 100-bp bins have zero reads 
+zeros <- colSums(counts==0)
+
+###   bam1   bam2   bam3   bam4   bam5   bam6   bam7   bam8   bam9  bam10  bam11  bam12 
+###   753   1984  22550  53609  45415  90003 242089 245783 243458 246363 248363 250259 
+###   bam13  bam14  bam15  bam16  bam17  bam18  bam19  bam20  bam21  bam22  bam23  bam24 
+###   257733 260071    433    437    438    466    438    422    441    459  89138  91338 
+###   bam25  bam26  bam27  bam28  bam29  bam30  bam31  bam32  bam33  bam34  bam35  bam36 
+###   101623 105839 225684 126480  18980  63897   1158   1117    747    514  10173  10708 
+###   bam37  bam38  bam39  bam40  bam41  bam42  bam43  bam44  bam45  bam46  bam47  bam48 
+###   1139   1304  75964  76176   2097   2150   2666   2720   1735   1784    827    877 
+###   bam49  bam50  bam51  bam52  bam53  bam54  bam55  bam56  bam57  bam58  bam59  bam60 
+###   701    743   1480   3105    341    381   2274   2364   1235    999    201    276 
+
+### percentage of bins with zero reads 
+round(zeros/1315599,3)
+
+as.data.frame(round(zeros/1315599,3)*100)
+
+#  bam1    0.1
+#  bam2    0.2
+#  bam3    1.7
+#  bam4    4.1
+#  bam5    3.5
+#  bam6    6.8
+#  bam7   18.4
+#  bam8   18.7
+#  bam9   18.5
+#  bam10  18.7
+#  bam11  18.9
+#  bam12  19.0
+#  bam13  19.6
+#  bam14  19.8
+#  bam15   0.0
+#  bam16   0.0
+#  bam17   0.0
+#  bam18   0.0
+#  bam19   0.0
+#  bam20   0.0
+#  bam21   0.0
+#  bam22   0.0
+#  bam23   6.8
+#  bam24   6.9
+#  bam25   7.7
+#  bam26   8.0
+#  bam27  17.2
+#  bam28   9.6
+#  bam29   1.4
+#  bam30   4.9
+#  bam31   0.1
+#  bam32   0.1
+#  bam33   0.1
+#  bam34   0.0
+#  bam35   0.8
+#  bam36   0.8
+#  bam37   0.1
+#  bam38   0.1
+#  bam39   5.8
+#  bam40   5.8
+#  bam41   0.2
+#  bam42   0.2
+#  bam43   0.2
+#  bam44   0.2
+#  bam45   0.1
+#  bam46   0.1
+#  bam47   0.1
+#  bam48   0.1
+#  bam49   0.1
+#  bam50   0.1
+#  bam51   0.1
+#  bam52   0.2
+#  bam53   0.0
+#  bam54   0.0
+#  bam55   0.2
+#  bam56   0.2
+#  bam57   0.1
+#  bam58   0.1
+#  bam59   0.0
+#  bam60   0.0
+
+## keep only the samples with zeros under 1 %
+
+#  bam1    0.1
+#  bam2    0.2
+#  bam15   0.0
+#  bam16   0.0
+#  bam17   0.0
+#  bam18   0.0
+#  bam19   0.0
+#  bam20   0.0
+#  bam21   0.0
+#  bam22   0.0
+#  bam31   0.1
+#  bam32   0.1
+#  bam33   0.1
+#  bam34   0.0
+#  bam35   0.8
+#  bam36   0.8
+#  bam37   0.1
+#  bam38   0.1
+#  bam41   0.2
+#  bam42   0.2
+#  bam43   0.2
+#  bam44   0.2
+#  bam45   0.1
+#  bam46   0.1
+#  bam47   0.1
+#  bam48   0.1
+#  bam49   0.1
+#  bam50   0.1
+#  bam51   0.1
+#  bam52   0.2
+#  bam53   0.0
+#  bam54   0.0
+#  bam55   0.2
+#  bam56   0.2
+#  bam57   0.1
+#  bam58   0.1
+#  bam59   0.0
+#  bam60   0.0
+
+good_bams <- c("bam1", "bam2", "bam15", "bam16", "bam17", "bam18", "bam19", 
+               "bam20", "bam21", "bam22", "bam31", "bam32", "bam33", "bam34", "bam35",
+               "bam36", "bam37", "bam38", "bam41", "bam42", "bam43", "bam44", "bam45",
+               "bam46", "bam47", "bam48", "bam49", "bam50", "bam51", "bam52", "bam53",
+               "bam54", "bam55", "bam56", "bam57", "bam58", "bam59","bam60")
+
+counts.small <- counts[,good_bams]
+
+dim(counts.small)
+# [1] 1315599      38
+
+#####    calculate TPMs
+TPM <- t( t(counts.small) * 1e6 / colSums(counts.small) )
+
+##  > colSums(TPM)
+##     bam1    bam2   bam15   bam16   bam17   bam18   bam19   bam20   bam21   bam22   bam31   bam32   bam33 
+##  1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 
+##  
+##    bam34   bam35   bam36   bam37   bam38   bam41   bam42   bam43   bam44   bam45   bam46   bam47   bam48 
+##  1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 
+##  
+##    bam49   bam50   bam51   bam52   bam53   bam54   bam55   bam56   bam57   bam58   bam59   bam60 
+##  1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 
+
+# There is no need to have the raw counts, only merge the GC
+
+norm.df <- merge(GC[,c("GC","GC.bracket")], TPM, by="row.names")
+
+# head(GC)
+# head(TPM)
+# head(norm.df)
+#########             
+
+# clean from unused files
+rm(GC)
+rm(cov)
+rm(TPM)
+gc()
+
+##### in the first version, I normalized all the sample together,
+##### by calculating the median coverage of all bins across all samples, using this :
+##### norm.df$bam.median <- round(apply(norm.df[grep(".norm", names(norm.df))], 1, median),3)
+##### But hits is not ideal ,because not all samples vary in the same way at different GC% 
+##### some will have spikes, some low coverage, some normal).
+##### We need to normalize each sample for ITS OWN median coverage in each bracket of GC%
+##### Below I normalize each sample separately (each sample will have its own median)
+ 
+##  split dataframe in brackets of GC, for each GC% bracket, we calculate the "bracket.median" *_in that sample_*
+##  ddply: Split data frame, apply function, and return results in a data frame.
+##  https://www.rdocumentation.org/packages/plyr/versions/1.8.7/topics/ddply
+##  I used "colwise"    https://stackoverflow.com/questions/18719041/r-for-loop-with-ddply
+
+medians <- ddply(norm.df[,!names(norm.df) %in% c("Row.names","GC")], .(GC.bracket), colwise(median))
+
+##  we should not have this problem anymore because we discarder sample sith a lot of zero coverage.
+
+### when median is 0, will generate a "Inf" when dividing the TPM by the median.
+### set median = 0 to the minimum median in that sample. It's an approximation in the correction BUT
+### will prevent dividing valid bins by 0 -> deletion of the bin because it becomes "Inf"
+
+# medians <-   medians.tmp %>% mutate_all(., ~ replace(., . == 0, min(as.numeric(.[.>0]))))
+
+## merge with the normalized counts
+df.medians <- merge(norm.df, medians, by="GC.bracket", suffixes = c("norm","mdn"))
+
+## verify by hand on two columns (arbitrarily chosen)
+## unique(df.medians$bam1mdn)
+## [1] 0.638 0.709 0.780
+## unique(by(df.medians$bam1norm, df.medians$GC.bracket, median))
+## [1] 0.638 0.709 0.780
+
+## unique(df.medians$bam17mdn)
+## [1] 0.588 0.744 0.784 0.705 0.823
+## unique(by(df.medians$bam17norm, df.medians$GC.bracket, median))
+## [1] 0.588 0.744 0.784 0.705 0.823
+ 
+## Calculate the median coverage of each sample (for each sample, the median of the medians of the 10 bracket, )
+ 
+total.median.cov <- vector(mode="numeric", length=38)
+
+for (i in 1:38)
+{
+  total.median.cov[i] <- colMedians(as.matrix(medians[i+1]))
+}
+
+gc()
+
+### calculate the correction factor to apply to each quantile for each sample
+
+correction_factors <- matrix(nrow = 10, ncol = 38)
+correction_factors <- t(t(medians[,c(2:39)]) / total.median.cov)
+correction_factors <- cbind(GC.bracket=medians[,"GC.bracket"], correction_factors)
+
+##### We apply this correction factor to each bin in the genome, to normalize for the skew in coverage in that quantile of GC%
+##### .norm = normalized for sequencing depth
+##### .factor = correction factor
+##### .corr = corrected for sequencability in GC% brackets
+gc()
+
+corr.df <- merge(norm.df, correction_factors, by="GC.bracket", suffixes=c(".norm",".factor"))
+
+head(corr.df)
+dim(corr.df)
+head(corr.df[4:41])     ## reads normalized for sequencing depth (TPM)
+head(corr.df[42:79])   ## correction factors
+
+dim(corr.df[4:41])    
+dim(corr.df[42:79])
+
+###### correct dividing reads by median coverage in that bracket of GC
+corr.df[80:117] <- corr.df[4:41] / corr.df[42:79]
+
+head(corr.df[80:117])   ## reads correctred for GC% 
+colnames(corr.df)[80:117] <- gsub("norm.1", "corr", colnames(corr.df[80:117]))
+
+###### here set rownames in corr.df and also in norm.df as Row.names, then make Chr and start and sort bsed on them.
+head(corr.df)
+corr.df$Chr <- as.vector((sapply(strsplit(corr.df$Row.names, "_", fixed=TRUE), "[", 1) ))
+corr.df$s   <- as.numeric(as.vector((sapply(strsplit(corr.df$Row.names, "_", fixed=TRUE), "[", 2) )))
+corr.df$e   <- as.numeric((corr.df$s) + 100)
+
+### ## to keep everything sorted, always assign rownames
+rownames(corr.df) <- corr.df$Row.names 
+corr.df$Row.names <- NULL
+gc()
+####    re-sort columns
+corr.df <- corr.df[order(corr.df$Chr, corr.df$s),]
+ 
+colnames(corr.df)
+
+corr.df <- corr.df[,c("Chr"         ,  "s"           , "e"           ,
+                     "GC.bracket"  ,  "GC"          , "bam1.norm"   , "bam2.norm"    , "bam15.norm"   , "bam16.norm"   , "bam17.norm"  ,
+                     "bam18.norm"  ,  "bam19.norm"  , "bam20.norm"  , "bam21.norm"   , "bam22.norm"   , "bam31.norm"   , "bam32.norm"  ,
+                     "bam33.norm"  ,  "bam34.norm"  , "bam35.norm"  , "bam36.norm"   , "bam37.norm"   , "bam38.norm"   , "bam41.norm"  ,
+                     "bam42.norm"  ,  "bam43.norm"  , "bam44.norm"  , "bam45.norm"   , "bam46.norm"   , "bam47.norm"   , "bam48.norm"  ,
+                     "bam49.norm"  ,  "bam50.norm"  , "bam51.norm"  , "bam52.norm"   , "bam53.norm"   , "bam54.norm"   , "bam55.norm"  ,
+                     "bam56.norm"  ,  "bam57.norm"  , "bam58.norm"  , "bam59.norm"   , "bam60.norm"   , "bam1.factor"  , "bam2.factor" ,
+                     "bam15.factor",  "bam16.factor", "bam17.factor", "bam18.factor" , "bam19.factor" , "bam20.factor" , "bam21.factor",
+                     "bam22.factor",  "bam31.factor", "bam32.factor", "bam33.factor" , "bam34.factor" , "bam35.factor" , "bam36.factor",
+                     "bam37.factor",  "bam38.factor", "bam41.factor", "bam42.factor" , "bam43.factor" , "bam44.factor" , "bam45.factor",
+                     "bam46.factor",  "bam47.factor", "bam48.factor", "bam49.factor" , "bam50.factor" , "bam51.factor" , "bam52.factor",
+                     "bam53.factor",  "bam54.factor", "bam55.factor", "bam56.factor" , "bam57.factor" , "bam58.factor" , "bam59.factor",
+                     "bam60.factor",  "bam1.corr"   , "bam2.corr"   , "bam15.corr"   , "bam16.corr"   , "bam17.corr"   , "bam18.corr"  ,
+                     "bam19.corr"  ,  "bam20.corr"  , "bam21.corr"  , "bam22.corr"   , "bam31.corr"   , "bam32.corr"   , "bam33.corr"  ,
+                     "bam34.corr"  ,  "bam35.corr"  , "bam36.corr"  , "bam37.corr"   , "bam38.corr"   , "bam41.corr"   , "bam42.corr"  ,
+                     "bam43.corr"  ,  "bam44.corr"  , "bam45.corr"  , "bam46.corr"   , "bam47.corr"   , "bam48.corr"   , "bam49.corr"  ,
+                     "bam50.corr"  ,  "bam51.corr"  , "bam52.corr"  , "bam53.corr"   , "bam54.corr"   , "bam55.corr"   , "bam56.corr"  ,
+                     "bam57.corr"  ,  "bam58.corr"  , "bam59.corr"  , "bam60.corr" )] 
+gc()
+
+head(corr.df)
+############## ############## ############## ############## ############## ############## ############## ############## 
+############## ############## ############## ############## ############## ############## ############## ############## 
+
+############## optional = plot before and after correction
+
+list_plot <- vector(mode='list', length=38)
+  
+for (i in (1:38))
+{
+  list_plot[[i]] <- cbind(corr.df[4], corr.df[i+5], corr.df[i+81])
+  names(list_plot)[i] <- paste("Sample", i, sep="_")
+}
+
+
+list_plot.long <- lapply(list_plot, reshape2::melt, id.vars=c("GC.bracket") )
+
+  for (q in 1:38)
+  {
+    treatment        <- c("Before correction","After correction")
+    names(treatment) <- c(names(list_plot[[q]])[2], names(list_plot[[q]])[3] )
+  
+ correction.plot <- ggplot(list_plot.long[[q]], aes(x=GC.bracket-0.5 , y=value, group=factor(GC.bracket))) + 
+    coord_cartesian(ylim=c(0,2.0)) +
+    geom_boxplot(outlier.shape = NA, alpha=0.5, width=0.7, fill="darkgrey") +
+    facet_grid(.~variable, labeller = labeller(variable = treatment)) +
+   geom_hline(yintercept = total.median.cov[q],  color="red", size=0.75) +
+    scale_y_continuous(name="Median\ncoverage") + scale_x_continuous(name = "GC %", breaks=seq(0,10,1), 
+                       labels= sprintf("%.f%%", seq(0,100,10))) +
+    ggtitle(gsub(".norm","", names(list_plot[[q]])[2])) +
+    theme_bw() + theme(panel.grid.minor = element_blank()) +
+    theme(strip.text.x = element_text(angle=0,size=10), strip.placement="outside") +
+    theme(axis.text.x =  element_text(size=8)) + theme(axis.text.y =  element_text(size=8)) +
+    theme(axis.title.y =  element_text(size=12, angle=0, vjust=0.5)) +
+    theme(axis.title.x =  element_text(size=12, hjust=0.5,vjust=-1.25)) +
+    theme(plot.title  =  element_text(hjust=0.5)) 
+  
+  ggsave(correction.plot, width = 20, height = 10, units = "cm", dpi = 600, 
+         filename=paste("GC_brackets.correction.Sample_", gsub(".norm","", names(list_plot[[q]])[2]),".15Apr2023.pdf", sep=""), device="pdf")
+  rm(correction.plot)
+  gc()
+  }
+
+#### 
+
+ saveRDS(list_plot, file = "list_plot.GC_correction.30_Samples.15Apr2023.RDS")
+ saveRDS(list_plot.long, file = "list_plot.long.GC_correction.30_Samples.15Apr2023.RDS")
+ rm(list_plot)
+ rm(list_plot.long)
+ gc()
+
+############################################################################################################
+############################################################################################################
+ 
+############# no need to replot the corrected coverage (is the same as before)
+
+#############################################@
+
+##		 Sample_1	CEN.100bp.180307_NB501850_A_L1-4_ANYO-1_R1.sorted.filtered.nodup.bed 
+##		 Sample_2	CEN.100bp.180903_NB501850_A_L1-4_ANYO-16_R1.sorted.filtered.nodup.bed 
+##		 Sample_3	CEN.100bp.201224_I22_V300086931_L4_C2_1.sorted.filtered.nodup.bed 
+##		 Sample_4	CEN.100bp.201224_I22_V300086931_L4_D3_1.sorted.filtered.nodup.bed 
+##		 Sample_5	CEN.100bp.201224_I22_V300086931_L4_D8_1.sorted.filtered.nodup.bed 
+##		 Sample_6	CEN.100bp.201224_I22_V300086931_L4_G4_1.sorted.filtered.nodup.bed 
+##		 Sample_7	CEN.100bp.2017_336_S2_L001_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_8	CEN.100bp.2017_336_S2_L001_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_9	CEN.100bp.2017_336_S2_L002_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_10	CEN.100bp.2017_336_S2_L002_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_11	CEN.100bp.2017_336_S2_L003_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_12	CEN.100bp.2017_336_S2_L003_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_13	CEN.100bp.2017_336_S2_L004_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_14	CEN.100bp.2017_336_S2_L004_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_15	CEN.100bp.2017_351_S9_L001_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_16	CEN.100bp.2017_351_S9_L001_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_17	CEN.100bp.2017_351_S9_L002_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_18	CEN.100bp.2017_351_S9_L002_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_19	CEN.100bp.2017_351_S9_L003_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_20	CEN.100bp.2017_351_S9_L003_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_21	CEN.100bp.2017_351_S9_L004_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_22	CEN.100bp.2017_351_S9_L004_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_23	CEN.100bp.210318_I100400190019_V300099928_L1_IP_WT_D_R1_1.sorted.filtered.nodup.bed 
+##		 Sample_24	CEN.100bp.210318_I100400190019_V300099928_L1_IP_WT_D_R1_2.sorted.filtered.nodup.bed 
+##		 Sample_25	CEN.100bp.210318_I100400190019_V300099928_L1_IP_WT_L_R1_1.sorted.filtered.nodup.bed 
+##		 Sample_26	CEN.100bp.210318_I100400190019_V300099928_L1_IP_WT_L_R1_2.sorted.filtered.nodup.bed 
+##		 Sample_27	CEN.100bp.211110_M029_V350030665_L02_input_1_1.sorted.filtered.nodup.bed 
+##		 Sample_28	CEN.100bp.211110_M029_V350030665_L02_input_2_1.sorted.filtered.nodup.bed 
+##		 Sample_29	CEN.100bp.211110_M029_V350030665_L02_input_3_1.sorted.filtered.nodup.bed 
+##		 Sample_30	CEN.100bp.211110_M029_V350030665_L02_input_4_1.sorted.filtered.nodup.bed 
+##		 Sample_31	CEN.100bp.6_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_32	CEN.100bp.6_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_33	CEN.100bp.antiHY5-input-wt_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_34	CEN.100bp.antiHY5-input-wt_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_35	CEN.100bp.H2Bub_input_wt_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_36	CEN.100bp.H2Bub_input_wt_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_37	CEN.100bp.input_1A_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_38	CEN.100bp.input_1A_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_39	CEN.100bp.input_1B_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_40	CEN.100bp.input_1B_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_41	CEN.100bp.input_1_wt_D_rep1_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_42	CEN.100bp.input_1_wt_D_rep1_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_43	CEN.100bp.input_1_wt_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_44	CEN.100bp.input_1_wt_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_45	CEN.100bp.input_6_wt_D_rep2_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_46	CEN.100bp.input_6_wt_D_rep2_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_47	CEN.100bp.input_col_22C_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_48	CEN.100bp.input_col_22C_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_49	CEN.100bp.input_col_37C_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_50	CEN.100bp.input_col_37C_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_51	CEN.100bp.input_K27_WT_rep1_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_52	CEN.100bp.input_K27_WT_rep1_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_53	CEN.100bp.input_K27_WT_rep2_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_54	CEN.100bp.input_K27_WT_rep2_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_55	CEN.100bp.input_wt_L1_1.sorted.filtered.nodup.bed 
+##		 Sample_56	CEN.100bp.input_wt_L1_2.sorted.filtered.nodup.bed 
+##		 Sample_57	CEN.100bp.input-WT-rep2_R1_001.sorted.filtered.nodup.bed 
+##		 Sample_58	CEN.100bp.input-WT-rep2_R2_001.sorted.filtered.nodup.bed 
+##		 Sample_59	CEN.100bp.INWT_35217_CGATGT.sorted.filtered.nodup.bed 
+##		 Sample_60	CEN.100bp.SIM7_1.sorted.filtered.nodup.bed 
+
+## need to resort first? 
+  
+gc()
+##############################################################################################################
+##############################################################################################################
+
+###  masking
+
+#  4-You calculate the median and the Median absolute deviation for the corrected read-depth values of each sample
+
+total_medians <- apply(corr.df[82:119], 2, median, na.rm = TRUE, hasNA = T, keep.names=TRUE)
+
+as.data.frame(total_medians)
+
+##    total_medians
+##   bam1.corr          0.745
+##   bam2.corr          0.750
+##   bam15.corr         0.741
+##   bam16.corr         0.746
+##   bam17.corr         0.744
+##   bam18.corr         0.750
+##   bam19.corr         0.746
+##   bam20.corr         0.752
+##   bam21.corr         0.746
+##   bam22.corr         0.752
+##   bam31.corr         0.722
+##   bam32.corr         0.723
+##   bam33.corr         0.746
+##   bam34.corr         0.749
+##   bam35.corr         0.701
+##   bam36.corr         0.704
+##   bam37.corr         0.697
+##   bam38.corr         0.697
+##   bam41.corr         0.664
+##   bam42.corr         0.665
+##   bam43.corr         0.676
+##   bam44.corr         0.673
+##   bam45.corr         0.739
+##   bam46.corr         0.740
+##   bam47.corr         0.745
+##   bam48.corr         0.745
+##   bam49.corr         0.760
+##   bam50.corr         0.761
+##   bam51.corr         0.707
+##   bam52.corr         0.724
+##   bam53.corr         0.764
+##   bam54.corr         0.766
+##   bam55.corr         0.678
+##   bam56.corr         0.674
+##   bam57.corr         0.693
+##   bam58.corr         0.656
+##   bam59.corr         0.769
+##   bam60.corr         0.752
+
+corrected.cov.mad <- apply(corr.df[82:119], 2, mad, na.rm = TRUE)
+
+as.data.frame(corrected.cov.mad)
+
+
+##            corrected.cov.mad
+##  bam1.corr              0.245
+##  bam2.corr              0.257
+##  bam15.corr             0.231
+##  bam16.corr             0.233
+##  bam17.corr             0.232
+##  bam18.corr             0.247
+##  bam19.corr             0.233
+##  bam20.corr             0.248
+##  bam21.corr             0.246
+##  bam22.corr             0.248
+##  bam31.corr             0.153
+##  bam32.corr             0.153
+##  bam33.corr             0.142
+##  bam34.corr             0.146
+##  bam35.corr             0.346
+##  bam36.corr             0.348
+##  bam37.corr             0.258
+##  bam38.corr             0.258
+##  bam41.corr             0.246
+##  bam42.corr             0.247
+##  bam43.corr             0.286
+##  bam44.corr             0.285
+##  bam45.corr             0.243
+##  bam46.corr             0.244
+##  bam47.corr             0.149
+##  bam48.corr             0.149
+##  bam49.corr             0.138
+##  bam50.corr             0.139
+##  bam51.corr             0.262
+##  bam52.corr             0.283
+##  bam53.corr             0.189
+##  bam54.corr             0.183
+##  bam55.corr             0.287
+##  bam56.corr             0.286
+##  bam57.corr             0.216
+##  bam58.corr             0.205
+##  bam59.corr             0.169
+##  bam60.corr             0.223
+ 
+#######################@
+
+### add the intervals of MADs
+
+########  TRY 3 MADS  FIRST   -- > probably need 4 MADS 
+
+top3_limit <- total_medians + (3 * corrected.cov.mad)
+low3_limit <- total_medians - (3 * corrected.cov.mad)
+
+## but low3_limit often is UNDER 0
+
+as.data.frame(low3_limit)
+
+##           low3_limit
+##  bam1.corr     0.00864
+##  bam2.corr    -0.01981
+##  bam15.corr    0.04715
+##  bam16.corr    0.04747
+##  bam17.corr    0.04736
+##  bam18.corr    0.00870
+##  bam19.corr    0.04748
+##  bam20.corr    0.00873
+##  bam21.corr    0.00866
+##  bam22.corr    0.00873
+##  bam31.corr    0.26308
+##  bam32.corr    0.26349
+##  bam33.corr    0.32056
+##  bam34.corr    0.31047
+##  bam35.corr   -0.33827
+##  bam36.corr   -0.33963
+##  bam37.corr   -0.07802
+##  bam38.corr   -0.07802
+##  bam41.corr   -0.07439
+##  bam42.corr   -0.07446
+##  bam43.corr   -0.18311
+##  bam44.corr   -0.18219
+##  bam45.corr    0.00857
+##  bam46.corr    0.00858
+##  bam47.corr    0.29707
+##  bam48.corr    0.29728
+##  bam49.corr    0.34497
+##  bam50.corr    0.34526
+##  bam51.corr   -0.07910
+##  bam52.corr   -0.12344
+##  bam53.corr    0.19757
+##  bam54.corr    0.21662
+##  bam55.corr   -0.18348
+##  bam56.corr   -0.18255
+##  bam57.corr    0.04406
+##  bam58.corr    0.04177
+##  bam59.corr    0.26214
+##  bam60.corr    0.08303 
+# rm(outlier3)
+
+as.data.frame(top3_limit)
+
+##              top3_limit
+##   bam1.corr        1.48
+##   bam2.corr        1.52
+##   bam15.corr       1.44
+##   bam16.corr       1.44
+##   bam17.corr       1.44
+##   bam18.corr       1.49
+##   bam19.corr       1.45
+##   bam20.corr       1.50
+##   bam21.corr       1.48
+##   bam22.corr       1.50
+##   bam31.corr       1.18
+##   bam32.corr       1.18
+##   bam33.corr       1.17
+##   bam34.corr       1.19
+##   bam35.corr       1.74
+##   bam36.corr       1.75
+##   bam37.corr       1.47
+##   bam38.corr       1.47
+##   bam41.corr       1.40
+##   bam42.corr       1.40
+##   bam43.corr       1.54
+##   bam44.corr       1.53
+##   bam45.corr       1.47
+##   bam46.corr       1.47
+##   bam47.corr       1.19
+##   bam48.corr       1.19
+##   bam49.corr       1.18
+##   bam50.corr       1.18
+##   bam51.corr       1.49
+##   bam52.corr       1.57
+##   bam53.corr       1.33
+##   bam54.corr       1.32
+##   bam55.corr       1.54
+##   bam56.corr       1.53
+##   bam57.corr       1.34
+##   bam58.corr       1.27
+##   bam59.corr       1.28
+##   bam60.corr       1.42
+
+outlier3 <- as.data.frame(matrix(ncol=38, nrow = nrow(corr.df)))
+
+for (i in 1:38)
+{
+  outlier3[i] <-  ifelse((  (corr.df[i+81] > top3_limit[i]) | (corr.df[i+81] < low3_limit[i]) ) ,
+                         "outlier", "standard")
+}
+ 
+######### if needed, save file that include median and with limits, like this :
+
+mask3.df <- cbind(corr.df[c(1:3)], outlier3)
+colnames(mask3.df)[4:41] <- colnames(corr.df)[82:119]
+
+#############
+
+mask3.tracks <- vector(mode='list', length=38)
+
+for (i in 1:38)
+{
+  mask3.tracks[[i]] <- as.data.frame(cbind(mask3.df[,c(1,2,3,i+3)]))
+  names(mask3.tracks)[[i]]  <-   gsub(".corr", "", colnames(mask3.df)[(i+3)])
+  mask3.tracks[[i]] <- mask3.tracks[[i]][mask3.tracks[[i]][4]=="outlier",]
+}
+
+sapply(names(mask3.tracks), function (x) write.table(mask3.tracks[[x]][1:3],
+                                                     row.names = F, quote = F,sep="\t", col.names = F,
+                                                     file=paste(x, "mask3.15Apr2023.bed", sep=".") ) )
+
+t(as.data.frame(lapply(mask3.tracks, nrow))) *100 / 1000000  ### ok 
+
+## megabases covered
+
+##  bam1  1.76    
+##  bam2  1.61    
+##  bam15 1.37    
+##  bam16 1.33    
+##  bam17 1.34    
+##  bam18 1.20    
+##  bam19 1.39    
+##  bam20 1.22    
+##  bam21 1.22    
+##  bam22 1.18    
+##  bam31 2.65    
+##  bam32 2.65    
+##  bam33 2.11    
+##  bam34 2.11    
+##  bam35 2.21    
+##  bam36 2.19    
+##  bam37 1.04    
+##  bam38 1.02    
+##  bam41 1.77    
+##  bam42 1.75    
+##  bam43 1.70    
+##  bam44 1.72    
+##  bam45 1.85    
+##  bam46 1.86    
+##  bam47 1.96    
+##  bam48 1.97    
+##  bam49 2.12    
+##  bam50 2.17    
+##  bam51 2.60    
+##  bam52 3.20    
+##  bam53 2.08    
+##  bam54 2.20    
+##  bam55 1.90    
+##  bam56 1.74    
+##  bam57 1.52    
+##  bam58 1.59    
+##  bam59 1.98    
+##  bam60 1.22  
+ 
+####################################################################################################
+####################################################################################################
+ 
+#### count number of files in which a certain bin is masked 
+
+mask3.df$depth <-  apply(mask3.df, 1, function(x) length(which(x=="outlier")))
+
+mask3.df.depth <- mask3.df[,c("Chr","s","e","depth")]
+
+write.table(mask3.df.depth,row.names = F, quote = F,sep="\t",
+            col.names = F,file="CEN.masking.3_MADS.15Apr2023.bedgraph")
+
+summary(mask3.df.depth$depth)
+
+#  Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+#  0.0     0.0     0.0     0.5     0.0    38.0 
+
+####################################################################################################
+####################################################################################################
+
+####################################################################################################
+####################################################################################################
+  
+options(scipen = 100, digits = 3)
+
+######
+
+low3_limit.tracks <- vector(mode='list', length=38)
+gc()
+for (i in 1:38)
+  {
+  low3_limit.tracks[[i]] <- cbind(corr.df[1:3], round(low3_limit[i],3) )
+  names(low3_limit.tracks)[[i]]  <- paste(gsub(".corr","",names(low3_limit))[i], "low_limit_3", sep=".")
+}                             
+
+gc()
+sapply(names(low3_limit.tracks), function (x) write.table(low3_limit.tracks[[x]],
+row.names = F, quote = F,sep="\t", col.names = F, file=paste(x, "bed.tmp", sep=".") ) )
+
+gc()
+system("for f in *.bed.tmp; do bedtools merge -i $f  -c 4 -o mean > `basename $f .tmp`graph; rm $f; done")
+
+######################  top_3
+
+top3_limit.tracks <- vector(mode='list', length=38)
+gc()
+for (i in 1:38)
+{
+  top3_limit.tracks[[i]] <- cbind(corr.df[1:3], round(top3_limit[i],3) )
+  names(top3_limit.tracks)[[i]]  <- paste(gsub(".corr","",names(top3_limit))[i], "low_limit_3", sep=".")
+}                             
+
+gc()
+sapply(names(top3_limit.tracks), function (x) write.table(top3_limit.tracks[[x]],
+ row.names = F, quote = F,sep="\t", col.names = F, file=paste(x, "bed.tmp", sep=".") ) )
+
+gc()
+system("for f in *.bed.tmp; do bedtools merge -i $f  -c 4 -o mean > `basename $f .tmp`graph; rm $f; done")
+
+#########################   medians 
+
+medians.tracks <- vector(mode='list', length=38)
+
+gc()
+for (i in 1:38)
+{
+  medians.tracks[[i]] <- cbind(corr.df[1:3], round(total_medians[i],3) )
+  names(medians.tracks)[[i]]  <-  paste(gsub(".corr","",names(total_medians))[i], "median", sep=".")
+}   
+
+
+sapply(names(medians.tracks), function (x) write.table(medians.tracks[[x]],
+ row.names = F, quote = F,sep="\t", col.names = F, file=paste(x, "bed.tmp", sep=".") ) )
+gc()
+system("for f in *.bed.tmp; do bedtools merge -i $f  -c 4 -o mean > `basename $f .tmp`graph; rm $f; done")
+
+###################################################################################################################
+###################################################################################################################
+
+##  plot frequency of bins masked versus the number of samples
+
+mask3.df$depth <-  apply(mask3.df, 1, function(x) length(which(x=="outlier")))
+
+mask3.df.depth <- mask3.df[,c("Chr","s","e","depth")]
+
+table(mask3.df.depth$depth)
+
+plot_depth <- ggplot(mask3.df.depth[mask3.df.depth$depth!=0,], aes(depth)) +
+  geom_histogram(fill="cornflowerblue", color="black", binwidth = 1) +
+  scale_y_log10() + scale_x_continuous(limits=c(0,39)) +
+  ylab("Number\nof\n100 bp bins") +
+geom_hline(yintercept = 10000) + annotate("text", x=20, y=15000, label="1 Mbp") +
+geom_hline(yintercept = 1000) + annotate("text", x=20, y=1500, label="100 kb") +
+geom_hline(yintercept = 100) + annotate("text", x=20, y=150, label="10 kb") 
+
+ggsave(plot_depth, width = 20, height = 15, units = "cm", dpi = 600,
+       filename="Masking.CEN.depth_frequency.15Apr2023.pdf", device="pdf")
+
+### do not use this below
+
+# plot_depth2 <-  ggplot(mask3.df.depth[mask3.df.depth$depth!=0,], aes(depth)) +
+#  geom_histogram(fill="cornflowerblue", color="black", binwidth = 3) +
+#  scale_y_log10() + scale_x_continuous(limits=c(0,45)) +
+#  ylab("Number\nof\n100kb bins") +
+#  geom_hline(yintercept = 10000) + annotate("text", x=20, y=15000, label="1 Mbp") +
+#  geom_hline(yintercept = 1000) + annotate("text", x=20, y=1500, label="100 kb") +
+#  geom_hline(yintercept = 100) + annotate("text", x=20, y=150, label="10 kb") 
+
+# ggsave(plot_depth, width = 20, height = 15, units = "cm", dpi = 600,
+#       filename="Masking.CEN.depth_frequency.15Apr2023.pdf", device="pdf")
+
+#########@ plot cumulative 
+
+mask3.df$depth <-  apply(mask3.df, 1, function(x) length(which(x=="outlier")))
+mask3.df.depth <- mask3.df[,c("Chr","s","e","depth")]
+summary(mask3.df.depth$depth)
+
+### delete bins not masked 
+mask3.df.depth <- mask3.df.depth[mask3.df.depth$depth!=0,]
+
+# Sorting x data
+# mask3.df.depth$depth <- sort(mask3.df.depth$depth)
+
+#  nrow(mask3.df.depth)
+#  [1] 228952 -->> 22,895,200 bp masked at least in 1 bin
+
+### do not save these 
+
+# low3_limit.tracks  (5.2 Gb)
+# top3_limit.tracks  (5.2 Gb)
+# medians.tracks     (5.2 Gb)
+
+rm(low3_limit.tracks)
+rm(top3_limit.tracks)
+rm(medians.tracks)
+
+## save.image("Masking.CEN.15Apr2023.Rdata")
+
+##### save bed files con bin masked in samples from 20 to 38
+
+# CEN.masking.3_MADS.15Apr2023.bedgraph
+
+head(mask3.df.depth)
+
+list.mask3.df.depth <- vector(mode='list', length=19)
+
+for (i in c(1:19) )
+  {
+  list.mask3.df.depth[[i]] <- mask3.df.depth[mask3.df.depth$depth>=(i+19),1:4]
+  write.table(list.mask3.df.depth[[i]], row.names = F, quote = F, sep="\t", col.names = F,
+              file=paste("CEN.masking.3_MADS.", i+19, "_samples.27Apr2023.bed.tmp", sep=""))
+  names(list.mask3.df.depth)[i] <- as.character(paste("cutoff.", i+19, "_samples", sep=""))
+  }                             
+
+system("for f in *_samples.27Apr2023.bed.tmp; 
+       do bedtools merge -i $f > `basename $f .tmp`; done")
+
+##### quantify the size of merged bins and % of single bins
+
+size.list.mask3.df.depth <- vector(mode='list', length=19)
+ 
+for (i in c(1:19) )
+{
+  size.list.mask3.df.depth[[i]] <- read.table(
+    paste("progressive_masking.27Apr2023/CEN.masking.3_MADS.", i+19, "_samples.27Apr2023.bed", sep=""))
+    names(size.list.mask3.df.depth)[i] <- as.character(paste("cutoff.", i+19, "_samples", sep=""))
+} 
+
+# lapply(size.list.mask3.df.depth, names)
+# lapply(size.list.mask3.df.depth, dim)
+
+size.list.mask3.df.depth.single_bins <- lapply(size.list.mask3.df.depth, function(x)
+                                               { x$size <- ( x$V3 - x$V2 )
+                                                 x <- x[x$size==100,]
+                                                 return(x) } )
+
+single_bins <- t(as.data.frame(lapply(size.list.mask3.df.depth.single_bins, dim)))[,1]
+
+##  cutoff.20_samples cutoff.21_samples cutoff.22_samples cutoff.23_samples cutoff.24_samples cutoff.25_samples 
+##                167               155               150               122               111                98 
+##  cutoff.26_samples cutoff.27_samples cutoff.28_samples cutoff.29_samples cutoff.30_samples cutoff.31_samples 
+##                 84                89                80                75                85                75 
+##  cutoff.32_samples cutoff.33_samples cutoff.34_samples cutoff.35_samples cutoff.36_samples cutoff.37_samples 
+##                 68                62                69                59                64                78 
+##  cutoff.38_samples 
+##                104 
+
+
+
+## need to evaluate the total number of bins  BEFORE merging
+
+t(as.data.frame(lapply(list.mask3.df.depth, dim)))
+##                     [,1] [,2]
+##  cutoff.20_samples 8783    4
+##  cutoff.21_samples 8698    4
+##  cutoff.22_samples 8591    4
+##  cutoff.23_samples 8446    4
+##  cutoff.24_samples 8359    4
+##  cutoff.25_samples 8261    4
+##  cutoff.26_samples 8111    4
+##  cutoff.27_samples 8048    4
+##  cutoff.28_samples 7984    4
+##  cutoff.29_samples 7928    4
+##  cutoff.30_samples 7869    4
+##  cutoff.31_samples 7814    4
+##  cutoff.32_samples 7734    4
+##  cutoff.33_samples 7636    4
+##  cutoff.34_samples 7547    4
+##  cutoff.35_samples 7431    4
+##  cutoff.36_samples 7303    4
+##  cutoff.37_samples 7081    4
+##  cutoff.38_samples 6722    4
+
+
+multi_bins <- t(as.data.frame(lapply(list.mask3.df.depth, dim)))[,1]
+
+##  cutoff.20_samples cutoff.21_samples cutoff.22_samples cutoff.23_samples cutoff.24_samples cutoff.25_samples 
+##               8783              8698              8591              8446              8359              8261 
+##  cutoff.26_samples cutoff.27_samples cutoff.28_samples cutoff.29_samples cutoff.30_samples cutoff.31_samples 
+##               8111              8048              7984              7928              7869              7814 
+##  cutoff.32_samples cutoff.33_samples cutoff.34_samples cutoff.35_samples cutoff.36_samples cutoff.37_samples 
+##               7734              7636              7547              7431              7303              7081 
+##  cutoff.38_samples 
+##               6722 
+
+############
+
+percent_single <- (single_bins / multi_bins) *100
+
+##  cutoff.20_samples cutoff.21_samples cutoff.22_samples cutoff.23_samples cutoff.24_samples cutoff.25_samples 
+##              1.901             1.782             1.746             1.444             1.328             1.186 
+##  cutoff.26_samples cutoff.27_samples cutoff.28_samples cutoff.29_samples cutoff.30_samples cutoff.31_samples 
+##              1.036             1.106             1.002             0.946             1.080             0.960 
+##  cutoff.32_samples cutoff.33_samples cutoff.34_samples cutoff.35_samples cutoff.36_samples cutoff.37_samples 
+##              0.879             0.812             0.914             0.794             0.876             1.102 
+##  cutoff.38_samples 
+##              1.547 
+
+as.data.frame(percent_single/100)
+
+############  Distribution of size after merging (excluding single 100-bp bins)
+
+size.list.mask3.df.depth.multi_bins <- lapply(size.list.mask3.df.depth, function(x)
+{ x$size <- ( x$V3 - x$V2 )
+x <- x[x$size>100,]
+return(x) } )
+
+multi_bins <- lapply(size.list.mask3.df.depth.multi_bins, function(x)
+{ summary(x$size)
+} )
+
+tab.multi_bins <- do.call(rbind, multi_bins)
+
+##                       Min.   1st Qu.  Median  Mean   3rd Qu.       Max.
+##  cutoff.20_samples     200       200     400  3034       900     244700
+##  cutoff.21_samples     200       200     400  3129      1000     244700
+##  cutoff.22_samples     200       200     400  3126      1200     221200
+##  cutoff.23_samples     200       200     500  3239      1300     221200
+##  cutoff.24_samples     200       200     400  3185      1400     179500
+##  cutoff.25_samples     200       200     400  3116      1400     179500
+##  cutoff.26_samples     200       300     500  3263      1675     179500
+##  cutoff.27_samples     200       200     400  3196      1800     114600
+##  cutoff.28_samples     200       200     500  3200      1550     114500
+##  cutoff.29_samples     200       200     500  3192      1775     114500
+##  cutoff.30_samples     200       300     600  3326      1875      94800
+##  cutoff.31_samples     200       300     600  3108      1900      94800
+##  cutoff.32_samples     200       300     600  2995      1800      94800
+##  cutoff.33_samples     200       300     600  2805      1700      91800
+##  cutoff.34_samples     200       300     600  2690      1675      91800
+##  cutoff.35_samples     200       300     600  2491      1700      91800
+##  cutoff.36_samples     200       300     500  2255      1300      91800
+##  cutoff.37_samples     200       300     600  1940      1300      91800
+##  cutoff.38_samples     200       300     500  1587      1200      91800
+
+
+#######
+
+#  single_bins <- lapply(size.list.mask3.df.depth.single_bins, function(x)
+#  { summary(x$size)
+#  } )
+
+#  tab.single_bins <- do.call(rbind, single_bins)
+
+####
+
+# size.list.mask3.df.depth.total <- lapply(size.list.mask3.df.depth, function(x)
+#  { x$size <- ( x$V3 - x$V2 )
+#  return(x) } )
+
+#  tab.total <- do.call(rbind, test)
+
+##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### 
+##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### ##### 
+
+
+##### total masked genome
+
+## without 100 bp bins 
+
+cov.multi <- lapply(size.list.mask3.df.depth.multi_bins, function(x)
+{  sum(x$size) } )
+
+tab.cov.multi <- do.call(rbind, cov.multi)  ## base pairs
+
+
+
+##  > tab.cov.multi
+##                      [,1]
+##  cutoff.20_samples 861,600
+##  cutoff.21_samples 854,300
+##  cutoff.22_samples 844,100
+##  cutoff.23_samples 832,400
+##  cutoff.24_samples 824,800
+##  cutoff.25_samples 816,300
+##  cutoff.26_samples 802,700
+##  cutoff.27_samples 795,900
+##  cutoff.28_samples 790,400
+##  cutoff.29_samples 785,300
+##  cutoff.30_samples 778,400
+##  cutoff.31_samples 773,900
+##  cutoff.32_samples 766,600
+##  cutoff.33_samples 757,400
+##  cutoff.34_samples 747,800
+##  cutoff.35_samples 737,200
+##  cutoff.36_samples 723,900
+##  cutoff.37_samples 700,300
+##  cutoff.38_samples 661,800
+
+
+###########
+
+cov.single <- lapply(size.list.mask3.df.depth.single_bins, function(x)
+{  sum(x$size) } )
+
+tab.cov.single <- do.call(rbind, cov.single)
+
+
+##  > tab.cov.single
+##                     [,1]
+##  cutoff.20_samples 16,700
+##  cutoff.21_samples 15,500
+##  cutoff.22_samples 15,000
+##  cutoff.23_samples 12,200
+##  cutoff.24_samples 11,100
+##  cutoff.25_samples  9,800
+##  cutoff.26_samples  8,400
+##  cutoff.27_samples  8,900
+##  cutoff.28_samples  8,000
+##  cutoff.29_samples  7,500
+##  cutoff.30_samples  8,500
+##  cutoff.31_samples  7,500
+##  cutoff.32_samples  6,800
+##  cutoff.33_samples  6,200
+##  cutoff.34_samples  6,900
+##  cutoff.35_samples  5,900
+##  cutoff.36_samples  6,400
+##  cutoff.37_samples  7,800
+##  cutoff.38_samples 10,400
+
+### total 
+
+cov.total <- lapply(size.list.mask3.df.depth.total, function(x)
+{  sum(x$size) } )
+
+tab.cov.total <- do.call(rbind, cov.total)
+
+
+##  > tab.cov.total
+##                      [,1]
+##  cutoff.20_samples 878,300
+##  cutoff.21_samples 869,800
+##  cutoff.22_samples 859,100
+##  cutoff.23_samples 844,600
+##  cutoff.24_samples 835,900
+##  cutoff.25_samples 826,100
+##  cutoff.26_samples 811,100
+##  cutoff.27_samples 804,800
+##  cutoff.28_samples 798,400
+##  cutoff.29_samples 792,800
+##  cutoff.30_samples 786,900
+##  cutoff.31_samples 781,400
+##  cutoff.32_samples 773,400
+##  cutoff.33_samples 763,600
+##  cutoff.34_samples 754,700
+##  cutoff.35_samples 743,100
+##  cutoff.36_samples 730,300
+##  cutoff.37_samples 708,100
+##  cutoff.38_samples 672,200
+
+
+
+
+
