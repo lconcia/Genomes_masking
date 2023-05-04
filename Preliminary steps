@@ -4,10 +4,8 @@
 
 ##   Download the assembly of interest
 
-```  
-
+```
 wget https://github.com/schatzlab/Col-CEN/blob/main/v1.2/Col-CEN_v1.2.fasta.gz?raw=true -O Col-CEN_v1.2.fasta.gz
-
 ```
 
 
