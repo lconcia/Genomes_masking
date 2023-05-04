@@ -2,41 +2,43 @@
 
 1. Download the assembly of interest
 
-``` 
+```bash
 wget https://github.com/schatzlab/Col-CEN/blob/main/v1.2/Col-CEN_v1.2.fasta.gz?raw=true -O Col-CEN_v1.2.fasta.gz 
 ``` 
 
 ##   Uncompress the fasta file and 
-
-  
+```
 gzip -d Col-CEN_v1.2.fasta.gz
-  
+```  
 
 ##   Index the index it and extract the chromosome size 
-
-  
+```
 samtools faidx Col-CEN_v1.2.fasta
 cut -f1,2      Col-CEN_v1.2.fasta.fai > Col-CEN_v1.2.sizes.genome
- 
+``` 
 
 ##   Split the genome in 100-bp non overlapping windows
-
- 
+```
 bedtools makewindows -g Col-CEN_v1.2.sizes.genome -w 100 > Col-CEN_v1.2.100bp.bed
- 
+``` 
 
 ##   Calculate GC% in the 100-bp bins
+```
 time bedtools nuc -fi  Col-CEN_v1.2.fasta -bed Col-CEN_v1.2.100bp.bed | \
 cut -f 1-3,5 | tail -n +2 > Col-CEN_v1.2.GC_value.bedgraph
+```
 
 ##   Count the reads mapping on each bins in each input samples 
+```
 for f in *input.bam
    do
 bedtools multicov -bams $f -bed Col-CEN_v1.2.100bp.bed > $f.100bp.bed
   done
+```
 
 ##   Concatenate the bed files
 
+```
 paste \
  <( cut -f 1-3 /kingdoms/mpb/workspace19/concia/H1_shared/reference_genomes.IBENS/CEN.genome_assembly/CEN.100bp.no_ChrM_ChrC.bed ) \
  <( cut -f 4 CEN.100bp.180307_NB501850_A_L1-4_ANYO-1_R1.sorted.filtered.nodup.bed ) \
@@ -100,5 +102,5 @@ paste \
  <( cut -f 4 CEN.100bp.INWT_35217_CGATGT.sorted.filtered.nodup.bed ) \
  <( cut -f 4 CEN.100bp.SIM7_1.sorted.filtered.nodup.bed )  > \
   CEN.100bp.masking.Vidal_samples.21Feb2023.bed
-
+```
 
