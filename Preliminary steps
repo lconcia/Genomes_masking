@@ -10,7 +10,7 @@ wget https://github.com/schatzlab/Col-CEN/blob/main/v1.2/Col-CEN_v1.2.fasta.gz?r
 
 
 ##   Uncompress the fasta file and 
-```
+```ruby
 gzip -d Col-CEN_v1.2.fasta.gz
 ```
 ##   Index the index it and extract the chromosome size 
