@@ -6,29 +6,29 @@
 wget https://github.com/schatzlab/Col-CEN/blob/main/v1.2/Col-CEN_v1.2.fasta.gz?raw=true -O Col-CEN_v1.2.fasta.gz 
 ``` 
 
-##   Uncompress the fasta file and 
+2. Uncompress the fasta file and 
 ```
 gzip -d Col-CEN_v1.2.fasta.gz
 ```  
 
-##   Index the index it and extract the chromosome size 
+3. Index the index it and extract the chromosome size 
 ```
 samtools faidx Col-CEN_v1.2.fasta
 cut -f1,2      Col-CEN_v1.2.fasta.fai > Col-CEN_v1.2.sizes.genome
 ``` 
 
-##   Split the genome in 100-bp non overlapping windows
+4. Split the genome in 100-bp non overlapping windows
 ```
 bedtools makewindows -g Col-CEN_v1.2.sizes.genome -w 100 > Col-CEN_v1.2.100bp.bed
 ``` 
 
-##   Calculate GC% in the 100-bp bins
+5. Calculate GC% in the 100-bp bins
 ```
 time bedtools nuc -fi  Col-CEN_v1.2.fasta -bed Col-CEN_v1.2.100bp.bed | \
 cut -f 1-3,5 | tail -n +2 > Col-CEN_v1.2.GC_value.bedgraph
 ```
 
-##   Count the reads mapping on each bins in each input samples 
+6. Count the reads mapping on each bins in each input samples 
 ```
 for f in *input.bam
    do
@@ -36,7 +36,7 @@ bedtools multicov -bams $f -bed Col-CEN_v1.2.100bp.bed > $f.100bp.bed
   done
 ```
 
-##   Concatenate the bed files
+7. Concatenate the bed files
 
 ```
 paste \
