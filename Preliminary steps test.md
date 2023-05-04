@@ -1,7 +1,6 @@
 # New Document
 
 
-
 Alt-H1
 ===
 
