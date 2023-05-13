@@ -1,5 +1,5 @@
 # Genomes_masking
-
+ 
 During the analysis of ChIP-Seq samples, the presence of artifacts, such as pileups of multi-mapped reads or regions with low coverage due to assembly gaps, can interfere with the identification of enrichment peaks.
 
 Here we provide a simple procedure to identify and mask these artifacts from ChIP-Seq input samples.
